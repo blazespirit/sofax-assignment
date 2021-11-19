@@ -1,0 +1,45 @@
+@import "src/base-style.scss";
+
+.appointmentForm {
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+  background: #fff;
+  padding: 30px 20px 30px 20px;
+  border-radius: $border-radius;
+  box-shadow: $panel-drop-shadow;
+}
+
+.form {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto;
+  gap: 15px;
+}
+
+.input {
+  flex-grow: 1;
+}
+
+.submitButtonWrapper {
+  display: flex;
+  flex-direction: row-reverse;
+  margin-top: 60px;
+}
+
+.submitButton {
+  width: 250px;
+}
+
+@media screen and (min-width: $wide-viewport) {
+  .form {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .submitButton {
+    width: 100%;
+  }
+}

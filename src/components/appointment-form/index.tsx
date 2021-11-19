@@ -1,8 +1,10 @@
 import { FC } from "react";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
-import { DatePicker } from "../date-picker";
-import { Option, TimePicker } from "../time-picker";
+import { DatePicker } from "../inputs/date-picker";
+import { Option, TimePicker } from "../inputs/time-picker";
+import styles from "./style.module.scss";
+import { Button } from "../button";
 
 type FormValues = {
   date: number;
@@ -10,8 +12,6 @@ type FormValues = {
 };
 
 export const AppointmentForm: FC = () => {
-  console.log("appointment form");
-
   const appointmentDefaultFormValues = {
     date: "",
     time: "",
@@ -32,19 +32,30 @@ export const AppointmentForm: FC = () => {
   ];
 
   return (
-    <div>
+    <div className={styles.appointmentForm}>
       <Formik
         initialValues={appointmentDefaultFormValues}
         validationSchema={formValidation}
         onSubmit={() => {}}
       >
         <Form>
-          <DatePicker name="date" placeholder="Appointment Date" />
-          <TimePicker
-            name="time"
-            placeholder="Appointment Time"
-            options={dateOptions}
-          />
+          <div className={styles.form}>
+            <div className={styles.input}>
+              <DatePicker name="date" placeholder="Appointment Date" />
+            </div>
+            <div className={styles.input}>
+              <TimePicker
+                name="time"
+                placeholder="Appointment Time"
+                options={dateOptions}
+              />
+            </div>
+          </div>
+          <div className={styles.submitButtonWrapper}>
+            <div className={styles.submitButton}>
+              <Button>Book</Button>
+            </div>
+          </div>
         </Form>
       </Formik>
     </div>

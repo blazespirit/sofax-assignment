@@ -1,12 +1,12 @@
-import DateFnsUtils from '@date-io/date-fns';
-import { createTheme, ThemeProvider } from '@material-ui/core/styles';
+import DateFnsUtils from "@date-io/date-fns";
+import { createTheme, ThemeProvider } from "@material-ui/core/styles";
 import {
   DatePicker as MuiDatePicker,
   MuiPickersUtilsProvider,
-} from '@material-ui/pickers';
-import clsx from 'clsx';
-import { format } from 'date-fns';
-import { ErrorMessage, useField } from 'formik';
+} from "@material-ui/pickers";
+import clsx from "clsx";
+import { format } from "date-fns";
+import { ErrorMessage, useField } from "formik";
 import {
   FC,
   MouseEvent,
@@ -15,11 +15,10 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import ClickAwayListener from 'react-click-away-listener';
-import styles from '../dropdown-picker-shared-style.module.scss';
-import calendarIcon from './calendar_24px.svg';
-import calendarDisabledIcon from './calendar_disabled_24px.svg';
+} from "react";
+import styles from "../dropdown-picker-shared-style.module.scss";
+import calendarIcon from "./calendar_24px.svg";
+import calendarDisabledIcon from "./calendar_disabled_24px.svg";
 
 type Props = {
   name: string;
@@ -84,14 +83,14 @@ export const DatePicker: FC<Props> = (props) => {
         onChange(time);
       }
     },
-    [helpers, setSelectedDate, closeCalendar, onChange],
+    [helpers, setSelectedDate, closeCalendar, onChange]
   );
 
   const formattedDateStr = useMemo(() => {
     const time = field.value;
-    if (!time) return '';
+    if (!time) return "";
     const dateObj = new Date(time);
-    return format(dateObj, 'dd/MM/yyyy');
+    return format(dateObj, "dd/MM/yyyy");
   }, [field.value]);
 
   const stopEventPropagation = useCallback((e: MouseEvent<HTMLElement>) => {
@@ -100,12 +99,12 @@ export const DatePicker: FC<Props> = (props) => {
 
   const isError = useMemo<boolean>(
     () => meta.touched && meta.error !== undefined,
-    [meta.touched, meta.error],
+    [meta.touched, meta.error]
   );
 
   const renderValidationErrorMsg = useCallback(
     (errMsg) => <div className={styles.validationErrorMsg}>{errMsg}</div>,
-    [],
+    []
   );
 
   // theming the date-picker
@@ -127,72 +126,64 @@ export const DatePicker: FC<Props> = (props) => {
   });
 
   return (
-    <ClickAwayListener onClickAway={closeCalendar}>
-      <div>
+    <>
+      <div
+        className={clsx(styles.container, {
+          [styles.error]: isError,
+          [styles.disabled]: disabled,
+        })}
+        onClick={toggleCalendar}
+        ref={nodeRef}
+        tabIndex={-1} // `tabIndex` is needed in order for <div> to be focusable
+      >
         <div
-          className={clsx(styles.container, {
+          className={clsx(styles.placeholder, {
             [styles.error]: isError,
+            [styles.label]: field.value !== "",
             [styles.disabled]: disabled,
           })}
-          onClick={toggleCalendar}
-          ref={nodeRef}
-          tabIndex={-1} // `tabIndex` is needed in order for <div> to be focusable
         >
+          {placeholder}
+        </div>
+        {field.value && (
           <div
-            className={clsx(styles.placeholder, {
-              [styles.error]: isError,
-              [styles.label]: field.value !== '',
+            className={clsx(styles.value, {
               [styles.disabled]: disabled,
             })}
           >
-            {placeholder}
+            {formattedDateStr}
           </div>
-          {field.value && (
-            <div
-              className={clsx(styles.value, {
-                [styles.disabled]: disabled,
-              })}
-            >
-              {formattedDateStr}
-            </div>
-          )}
-          {disabled ? (
-            <img
-              src={calendarDisabledIcon}
-              className={styles.icon}
-              alt="disabled-calender-icon"
-            />
-          ) : (
-            <img
-              src={calendarIcon}
-              className={styles.icon}
-              alt="calender-icon"
-            />
-          )}
-          {isCalendarOpen && (
-            <div className={styles.calendar} onClick={stopEventPropagation}>
-              <ThemeProvider theme={customTheme}>
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                  <MuiDatePicker
-                    value={selectedDate}
-                    onChange={onDateChange}
-                    variant="static"
-                    disableToolbar
-                    disablePast={disablePastDate}
-                    disableFuture={disableFutureDate}
-                    disabled={disabled}
-                    minDate={minDate}
-                    minDateMessage={minDateMessage}
-                  />
-                </MuiPickersUtilsProvider>
-              </ThemeProvider>
-            </div>
-          )}
-        </div>
-        <ErrorMessage name={field.name}>
-          {renderValidationErrorMsg}
-        </ErrorMessage>
+        )}
+        {disabled ? (
+          <img
+            src={calendarDisabledIcon}
+            className={styles.icon}
+            alt="disabled-calender-icon"
+          />
+        ) : (
+          <img src={calendarIcon} className={styles.icon} alt="calender-icon" />
+        )}
+        {isCalendarOpen && (
+          <div className={styles.calendar} onClick={stopEventPropagation}>
+            <ThemeProvider theme={customTheme}>
+              <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <MuiDatePicker
+                  value={selectedDate}
+                  onChange={onDateChange}
+                  variant="static"
+                  disableToolbar
+                  disablePast={disablePastDate}
+                  disableFuture={disableFutureDate}
+                  disabled={disabled}
+                  minDate={minDate}
+                  minDateMessage={minDateMessage}
+                />
+              </MuiPickersUtilsProvider>
+            </ThemeProvider>
+          </div>
+        )}
       </div>
-    </ClickAwayListener>
+      <ErrorMessage name={field.name}>{renderValidationErrorMsg}</ErrorMessage>
+    </>
   );
 };

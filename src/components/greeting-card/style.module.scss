@@ -1,11 +1,13 @@
 @import "src/base-style.scss";
 
 .card {
+  width: 100%;
   max-width: 800px;
-  color: $black;
+  box-sizing: border-box;
+  color: #fff;
   font-size: 16px;
   line-height: 24px;
-  background: #fff;
+  background: #da9e29;
   padding: 15px;
   border-radius: $border-radius;
   box-shadow: $panel-drop-shadow;
