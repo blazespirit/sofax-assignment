@@ -172,6 +172,8 @@ export const AppointmentForm: FC<Props> = (props) => {
 
       formikHelper.setSubmitting(false);
       formikHelper.resetForm();
+
+      alert("Your appointment had been confirmed, see you soon!");
     },
     [username]
   );
