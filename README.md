@@ -17,7 +17,7 @@ This project is created using `create-react-app` (https://github.com/facebook/cr
 
 # Firestore
 
-This project use Google Firestore to persist the date. If you like to run this on your own Firestore instance, just follow this instruction (https://firebase.google.com/docs/firestore/quickstart) to create a new Firestore and update the config in `firestore.ts` to point it into your instance.
+This project use Google Firestore to persist the date. If you like to run this on your own Firestore instance, just follow this instruction (https://firebase.google.com/docs/firestore/quickstart) to create a new Firestore and update the config in `firestore/index.ts` to point it into your instance.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
