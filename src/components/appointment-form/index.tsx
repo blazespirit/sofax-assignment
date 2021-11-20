@@ -1,7 +1,7 @@
 import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import { addDays, addWeeks, getHours, isWeekend, set } from "date-fns";
 import { onSnapshot } from "firebase/firestore";
-import { Form, Formik } from "formik";
+import { Form, Formik, FormikHelpers } from "formik";
 import { groupBy } from "lodash-es";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
@@ -148,7 +148,7 @@ export const AppointmentForm: FC<Props> = (props) => {
   );
 
   const makeAppointment = useCallback(
-    (formValues: FormValues) => {
+    async (formValues: FormValues, formikHelper: FormikHelpers<FormValues>) => {
       // Formik will validate the form before submit,
       // we shouldn't hit the below checking,
       // but just in case.
@@ -166,7 +166,12 @@ export const AppointmentForm: FC<Props> = (props) => {
         milliseconds: 0,
       });
 
-      createAppointment(adjustedDate, username);
+      formikHelper.setSubmitting(true);
+
+      await createAppointment(adjustedDate, username);
+
+      formikHelper.setSubmitting(false);
+      formikHelper.resetForm();
     },
     [username]
   );
@@ -184,7 +189,7 @@ export const AppointmentForm: FC<Props> = (props) => {
         validationSchema={formValidation}
         onSubmit={makeAppointment}
       >
-        {({ handleSubmit, values, setFieldValue, validateField }) => (
+        {({ setFieldValue }) => (
           <Form>
             <div className={styles.form}>
               <div className={styles.input}>
