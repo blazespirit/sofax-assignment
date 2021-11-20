@@ -1,10 +1,12 @@
-import { FC } from "react";
+import { FC, useCallback, useMemo } from "react";
 import { Form, Formik } from "formik";
 import * as Yup from "yup";
 import { DatePicker } from "../inputs/date-picker";
 import { Option, TimePicker } from "../inputs/time-picker";
 import styles from "./style.module.scss";
 import { Button } from "../button";
+import { addDays, addWeeks, isWeekend } from "date-fns";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
 type FormValues = {
   date: number;
@@ -71,6 +73,19 @@ export const AppointmentForm: FC = () => {
     },
   ];
 
+  // TODO -- check if the next 2 days fall on weekend as well
+  const earliestPossibleApppointmentDate = useMemo(
+    () => addDays(new Date(), 2),
+    []
+  );
+
+  const nextThreeWeeks = useMemo(() => addWeeks(new Date(), 3), []);
+
+  const disableWeekend = useCallback((date: MaterialUiPickersDate) => {
+    if (!date) return true;
+    return isWeekend(date);
+  }, []);
+
   return (
     <div className={styles.appointmentForm}>
       <div className={styles.annotation}>
@@ -87,7 +102,16 @@ export const AppointmentForm: FC = () => {
         <Form>
           <div className={styles.form}>
             <div className={styles.input}>
-              <DatePicker name="date" placeholder="Appointment Date" />
+              <DatePicker
+                name="date"
+                placeholder="Appointment Date"
+                preselectDate={earliestPossibleApppointmentDate}
+                minDate={earliestPossibleApppointmentDate}
+                minDateMessage="Appointment must be made 2 days in advance."
+                maxDate={nextThreeWeeks}
+                maxDateMessage="Appointment made cannot be more than 3 weeks in advance."
+                shouldDisableDate={disableWeekend}
+              />
             </div>
             <div className={styles.input}>
               <TimePicker

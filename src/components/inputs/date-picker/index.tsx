@@ -4,6 +4,7 @@ import {
   DatePicker as MuiDatePicker,
   MuiPickersUtilsProvider,
 } from "@material-ui/pickers";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 import clsx from "clsx";
 import { format } from "date-fns";
 import { ErrorMessage, useField } from "formik";
@@ -23,6 +24,7 @@ import calendarDisabledIcon from "./calendar_disabled_24px.svg";
 type Props = {
   name: string;
   placeholder: string;
+  preselectDate?: MaterialUiPickersDate;
   disablePastDate?: boolean;
   disableFutureDate?: boolean;
   disabled?: boolean;
@@ -30,6 +32,7 @@ type Props = {
   minDateMessage?: string;
   maxDate?: Date;
   maxDateMessage?: string;
+  shouldDisableDate?: (date: MaterialUiPickersDate) => boolean;
   onChange?: (newDate: any) => void;
 };
 
@@ -37,6 +40,7 @@ export const DatePicker: FC<Props> = (props) => {
   const {
     name,
     placeholder,
+    preselectDate,
     disablePastDate,
     disableFutureDate,
     disabled,
@@ -44,6 +48,7 @@ export const DatePicker: FC<Props> = (props) => {
     minDateMessage,
     maxDate,
     maxDateMessage,
+    shouldDisableDate,
     onChange,
   } = props;
   const [field, meta, helpers] = useField(name);
@@ -52,11 +57,18 @@ export const DatePicker: FC<Props> = (props) => {
   const nodeRef = useRef<HTMLDivElement>(null);
 
   // set the formik date into date-picker on initial start up
+  // useEffect(() => {
+  //   if (field.value) {
+  //     setSelectedDate(new Date(field.value));
+  //   }
+  // }, [field.value]);
+
+  // pre select the date if exist
   useEffect(() => {
-    if (field.value) {
-      setSelectedDate(new Date(field.value));
+    if (preselectDate) {
+      setSelectedDate(preselectDate);
     }
-  }, [field.value]);
+  }, [preselectDate]);
 
   const toggleCalendar = useCallback(() => {
     if (disabled) return;
@@ -183,6 +195,7 @@ export const DatePicker: FC<Props> = (props) => {
                   minDateMessage={minDateMessage}
                   maxDate={maxDate}
                   maxDateMessage={maxDateMessage}
+                  shouldDisableDate={shouldDisableDate}
                 />
               </MuiPickersUtilsProvider>
             </ThemeProvider>
