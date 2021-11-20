@@ -14,7 +14,7 @@ import {
 } from "../../firestore";
 import { Button } from "../button";
 import { DatePicker } from "../inputs/date-picker";
-import { Option, TimePicker } from "../inputs/time-picker";
+import { TimePicker } from "../inputs/time-picker";
 import { convertJsDateToDateString, getDefaultTimeOptions } from "./helpers";
 import styles from "./style.module.scss";
 
@@ -32,7 +32,7 @@ export const AppointmentForm: FC<Props> = (props) => {
   const [appointmentsGroupedByDate, setAppointmentsGroupedByDate] = useState<{
     [key: string]: AppointmentDoc[];
   }>({});
-  const [selectedDate, setSelectedDate] = useState();
+  const [selectedDate, setSelectedDate] = useState<number | undefined>();
 
   const appointmentDefaultFormValues: FormValues = {
     date: "",
@@ -100,8 +100,6 @@ export const AppointmentForm: FC<Props> = (props) => {
         );
 
         setAppointmentsGroupedByDate(appointmentsGroupedByDate);
-
-        console.log("appointmentsGroupedByDate", appointmentsGroupedByDate);
       });
     });
   }, [earliestPossibleApppointmentDate, nextThreeWeeks]);
@@ -133,6 +131,7 @@ export const AppointmentForm: FC<Props> = (props) => {
         });
         return {
           ...timeSlot,
+          label: taken ? `${timeSlot.label} (taken)` : timeSlot.label,
           taken,
         };
       }
@@ -140,9 +139,10 @@ export const AppointmentForm: FC<Props> = (props) => {
     return defaultOptionsWithUpdatedTakenField;
   }, [selectedDate, appointmentsGroupedByDate]);
 
-  const onDateChange = useCallback(
-    (date) => {
+  const handleDateChange = useCallback(
+    (setFieldValue) => (date: number) => {
       setSelectedDate(date);
+      setFieldValue("time", "");
     },
     [setSelectedDate]
   );
@@ -184,35 +184,37 @@ export const AppointmentForm: FC<Props> = (props) => {
         validationSchema={formValidation}
         onSubmit={makeAppointment}
       >
-        <Form>
-          <div className={styles.form}>
-            <div className={styles.input}>
-              <DatePicker
-                name="date"
-                placeholder="Appointment Date"
-                preselectDate={earliestPossibleApppointmentDate}
-                minDate={earliestPossibleApppointmentDate}
-                minDateMessage="Appointment must be made 2 days in advance."
-                maxDate={nextThreeWeeks}
-                maxDateMessage="Appointment made cannot be more than 3 weeks in advance."
-                shouldDisableDate={disableWeekend}
-                onChange={onDateChange}
-              />
+        {({ handleSubmit, values, setFieldValue, validateField }) => (
+          <Form>
+            <div className={styles.form}>
+              <div className={styles.input}>
+                <DatePicker
+                  name="date"
+                  placeholder="Appointment Date"
+                  preselectDate={earliestPossibleApppointmentDate}
+                  minDate={earliestPossibleApppointmentDate}
+                  minDateMessage="Appointment must be made 2 days in advance."
+                  maxDate={nextThreeWeeks}
+                  maxDateMessage="Appointment made cannot be more than 3 weeks in advance."
+                  shouldDisableDate={disableWeekend}
+                  onChange={handleDateChange(setFieldValue)}
+                />
+              </div>
+              <div className={styles.input}>
+                <TimePicker
+                  name="time"
+                  placeholder="Appointment Time"
+                  options={timeOptions}
+                />
+              </div>
             </div>
-            <div className={styles.input}>
-              <TimePicker
-                name="time"
-                placeholder="Appointment Time"
-                options={timeOptions}
-              />
+            <div className={styles.submitButtonWrapper}>
+              <div className={styles.submitButton}>
+                <Button>Book</Button>
+              </div>
             </div>
-          </div>
-          <div className={styles.submitButtonWrapper}>
-            <div className={styles.submitButton}>
-              <Button>Book</Button>
-            </div>
-          </div>
-        </Form>
+          </Form>
+        )}
       </Formik>
     </div>
   );

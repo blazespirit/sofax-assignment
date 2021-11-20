@@ -27,7 +27,7 @@ export const createAppointment = async (appointmentDate: Date, who: string) => {
       appointmentDate: Timestamp.fromDate(appointmentDate),
       createOn: serverTimestamp(),
     });
-    console.log(`Appointment created (ID: ${docRef.id})`);
+    console.info(`Appointment created (ID: ${docRef.id})`);
   } catch (e) {
     console.error("Error creating appointment: ", e);
   }
