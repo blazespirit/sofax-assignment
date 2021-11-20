@@ -28,6 +28,8 @@ type Props = {
   disabled?: boolean;
   minDate?: Date;
   minDateMessage?: string;
+  maxDate?: Date;
+  maxDateMessage?: string;
   onChange?: (newDate: any) => void;
 };
 
@@ -40,6 +42,8 @@ export const DatePicker: FC<Props> = (props) => {
     disabled,
     minDate,
     minDateMessage,
+    maxDate,
+    maxDateMessage,
     onChange,
   } = props;
   const [field, meta, helpers] = useField(name);
@@ -177,6 +181,8 @@ export const DatePicker: FC<Props> = (props) => {
                   disabled={disabled}
                   minDate={minDate}
                   minDateMessage={minDateMessage}
+                  maxDate={maxDate}
+                  maxDateMessage={maxDateMessage}
                 />
               </MuiPickersUtilsProvider>
             </ThemeProvider>

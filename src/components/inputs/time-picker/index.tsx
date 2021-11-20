@@ -41,14 +41,6 @@ export function TimePicker<T>(props: PropsWithChildren<Props<T>>) {
     }
   }, [disabled, setIsListOpen, isListOpen, nodeRef]);
 
-  const closeList = useCallback(() => {
-    setIsListOpen(false);
-
-    if (nodeRef.current) {
-      nodeRef.current.blur();
-    }
-  }, [setIsListOpen, nodeRef]);
-
   const setValue = useCallback(
     (newValue) => () => {
       helpers.setValue(newValue);

@@ -18,21 +18,67 @@ export const AppointmentForm: FC = () => {
   };
 
   const formValidation: Yup.SchemaOf<FormValues> = Yup.object({
-    date: Yup.number().required(),
-    time: Yup.number().required(),
+    date: Yup.number().required("Please select a date."),
+    time: Yup.number().required("Please select a desire time."),
   });
 
   // hard coded date options
   const dateOptions: Option<number>[] = [
     {
       id: "9",
-      label: "9-10",
+      label: "9am - 10am",
       value: 9,
+    },
+    {
+      id: "10",
+      label: "10am - 11am",
+      value: 10,
+    },
+    {
+      id: "11",
+      label: "11am - 12pm",
+      value: 11,
+    },
+    {
+      id: "12",
+      label: "12pm - 1pm",
+      value: 12,
+    },
+    {
+      id: "13",
+      label: "1pm - 2pm",
+      value: 13,
+    },
+    {
+      id: "14",
+      label: "2pm - 3pm",
+      value: 14,
+    },
+    {
+      id: "15",
+      label: "3pm - 4pm",
+      value: 15,
+    },
+    {
+      id: "16",
+      label: "4pm - 5pm",
+      value: 16,
+    },
+    {
+      id: "17",
+      label: "5pm - 6pm",
+      value: 17,
     },
   ];
 
   return (
     <div className={styles.appointmentForm}>
+      <div className={styles.annotation}>
+        <div>- Appointment must be made 2 days in advance.</div>
+        <div>- Appointment made cannot be more than 3 weeks in advance.</div>
+        <div>- Our operation hours is 9am to 6pm from Monday to Friday.</div>
+        <div>- We are closed on Saturday and Sunday.</div>
+      </div>
       <Formik
         initialValues={appointmentDefaultFormValues}
         validationSchema={formValidation}
