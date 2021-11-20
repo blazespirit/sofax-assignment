@@ -1,10 +1,16 @@
 import { FC } from "react";
 import styles from "./style.module.scss";
 
-export const GreetingCard: FC = () => {
+type Props = {
+  username: string;
+};
+
+export const GreetingCard: FC<Props> = (props) => {
+  const { username } = props;
+
   return (
     <div className={styles.card}>
-      <div>Hi there,</div>
+      <div>Hi {username},</div>
       <div>Welcome to SofaX</div>
       <div>
         You can make an appointment with our talented designers using the form

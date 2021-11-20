@@ -174,6 +174,16 @@ $input-error-msg-margin-top: 5px;
   background-color: $light-blue;
 }
 
+.disabledOption {
+  color: $disabled-grey;
+  background-color: $disabled-red;
+}
+
+.disabledOption:hover {
+  background-color: $disabled-red;
+  cursor: initial;
+}
+
 .validationErrorMsg {
   color: $error-red;
   font-size: $input-font-size-error-msg;

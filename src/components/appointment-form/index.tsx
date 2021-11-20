@@ -1,20 +1,40 @@
-import { FC, useCallback, useMemo } from "react";
+import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
+import { addDays, addWeeks, getHours, isWeekend, set } from "date-fns";
+import { onSnapshot } from "firebase/firestore";
 import { Form, Formik } from "formik";
+import { groupBy } from "lodash-es";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import * as Yup from "yup";
+
+import {
+  AppointmentDoc,
+  convertFirestoreTimestampToDateString,
+  createAppointment,
+  getAppointmentsQueryForDateRange,
+} from "../../firestore";
+import { Button } from "../button";
 import { DatePicker } from "../inputs/date-picker";
 import { Option, TimePicker } from "../inputs/time-picker";
+import { convertJsDateToDateString, getDefaultTimeOptions } from "./helpers";
 import styles from "./style.module.scss";
-import { Button } from "../button";
-import { addDays, addWeeks, isWeekend } from "date-fns";
-import { MaterialUiPickersDate } from "@material-ui/pickers/typings/date";
 
 type FormValues = {
-  date: number;
-  time: number;
+  date: number | string;
+  time: number | string;
 };
 
-export const AppointmentForm: FC = () => {
-  const appointmentDefaultFormValues = {
+type Props = {
+  username: string;
+};
+
+export const AppointmentForm: FC<Props> = (props) => {
+  const { username } = props;
+  const [appointmentsGroupedByDate, setAppointmentsGroupedByDate] = useState<{
+    [key: string]: AppointmentDoc[];
+  }>({});
+  const [selectedDate, setSelectedDate] = useState();
+
+  const appointmentDefaultFormValues: FormValues = {
     date: "",
     time: "",
   };
@@ -24,67 +44,132 @@ export const AppointmentForm: FC = () => {
     time: Yup.number().required("Please select a desire time."),
   });
 
-  // hard coded date options
-  const dateOptions: Option<number>[] = [
-    {
-      id: "9",
-      label: "9am - 10am",
-      value: 9,
-    },
-    {
-      id: "10",
-      label: "10am - 11am",
-      value: 10,
-    },
-    {
-      id: "11",
-      label: "11am - 12pm",
-      value: 11,
-    },
-    {
-      id: "12",
-      label: "12pm - 1pm",
-      value: 12,
-    },
-    {
-      id: "13",
-      label: "1pm - 2pm",
-      value: 13,
-    },
-    {
-      id: "14",
-      label: "2pm - 3pm",
-      value: 14,
-    },
-    {
-      id: "15",
-      label: "3pm - 4pm",
-      value: 15,
-    },
-    {
-      id: "16",
-      label: "4pm - 5pm",
-      value: 16,
-    },
-    {
-      id: "17",
-      label: "5pm - 6pm",
-      value: 17,
-    },
-  ];
-
   // TODO -- check if the next 2 days fall on weekend as well
-  const earliestPossibleApppointmentDate = useMemo(
-    () => addDays(new Date(), 2),
-    []
-  );
+  const earliestPossibleApppointmentDate = useMemo(() => {
+    const twoDaysAfter = addDays(new Date(), 2);
+    const startAt9am = set(twoDaysAfter, {
+      hours: 9,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 0,
+    });
 
-  const nextThreeWeeks = useMemo(() => addWeeks(new Date(), 3), []);
+    return startAt9am;
+  }, []);
+
+  const nextThreeWeeks = useMemo(() => {
+    const threeWeeksAfter = addWeeks(new Date(), 3);
+    const endAt5pm = set(threeWeeksAfter, {
+      hours: 17,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 0,
+    });
+
+    return endAt5pm;
+  }, []);
 
   const disableWeekend = useCallback((date: MaterialUiPickersDate) => {
     if (!date) return true;
     return isWeekend(date);
   }, []);
+
+  // get all the appointments in Firestore and update the available time slot.
+  // we can improve this section to reduce unnecessary re-render, but I think
+  // this is good enough for now.
+  useEffect(() => {
+    const appointmentsQuery = getAppointmentsQueryForDateRange(
+      earliestPossibleApppointmentDate,
+      nextThreeWeeks
+    );
+
+    onSnapshot(appointmentsQuery, (querySnapshot) => {
+      const allAppointmentsWithinSelectableRange: AppointmentDoc[] = [];
+
+      querySnapshot.forEach((doc) => {
+        allAppointmentsWithinSelectableRange.push(doc.data() as AppointmentDoc);
+
+        // group all the appointments by date
+        const appointmentsGroupedByDate = groupBy(
+          allAppointmentsWithinSelectableRange,
+          (appointmentRecord) => {
+            return convertFirestoreTimestampToDateString(
+              appointmentRecord.appointmentDate
+            );
+          }
+        );
+
+        setAppointmentsGroupedByDate(appointmentsGroupedByDate);
+
+        console.log("appointmentsGroupedByDate", appointmentsGroupedByDate);
+      });
+    });
+  }, [earliestPossibleApppointmentDate, nextThreeWeeks]);
+
+  // time dropdown option with 'taken' field update using the appointment records from Firestore
+  const timeOptions = useMemo(() => {
+    const defaultOptions = getDefaultTimeOptions();
+
+    if (!selectedDate) return defaultOptions;
+
+    const selectedDateString = convertJsDateToDateString(
+      new Date(selectedDate)
+    );
+
+    const appointmentsOnSelectedDate =
+      appointmentsGroupedByDate[selectedDateString];
+
+    if (!appointmentsOnSelectedDate) return defaultOptions;
+
+    const defaultOptionsWithUpdatedTakenField = defaultOptions.map(
+      (timeSlot) => {
+        let taken = false;
+        // loop thru each appointments to see if it's taken
+        appointmentsOnSelectedDate.forEach((appointment) => {
+          const appointmentDate = appointment.appointmentDate.toDate();
+          if (getHours(appointmentDate) === timeSlot.value) {
+            taken = true;
+          }
+        });
+        return {
+          ...timeSlot,
+          taken,
+        };
+      }
+    );
+    return defaultOptionsWithUpdatedTakenField;
+  }, [selectedDate, appointmentsGroupedByDate]);
+
+  const onDateChange = useCallback(
+    (date) => {
+      setSelectedDate(date);
+    },
+    [setSelectedDate]
+  );
+
+  const makeAppointment = useCallback(
+    (formValues: FormValues) => {
+      // Formik will validate the form before submit,
+      // we shouldn't hit the below checking,
+      // but just in case.
+      if (!formValues.date || !formValues.time) {
+        throw new Error("Form fields not completed!");
+      }
+
+      const selectedDate = new Date(formValues.date);
+
+      // set the hour to selected time
+      const adjustedDate = set(selectedDate, {
+        hours: formValues.time as number,
+        minutes: 0,
+        seconds: 0,
+        milliseconds: 0,
+      });
+
+      createAppointment(adjustedDate, username);
+    },
+    [username]
+  );
 
   return (
     <div className={styles.appointmentForm}>
@@ -97,7 +182,7 @@ export const AppointmentForm: FC = () => {
       <Formik
         initialValues={appointmentDefaultFormValues}
         validationSchema={formValidation}
-        onSubmit={() => {}}
+        onSubmit={makeAppointment}
       >
         <Form>
           <div className={styles.form}>
@@ -111,13 +196,14 @@ export const AppointmentForm: FC = () => {
                 maxDate={nextThreeWeeks}
                 maxDateMessage="Appointment made cannot be more than 3 weeks in advance."
                 shouldDisableDate={disableWeekend}
+                onChange={onDateChange}
               />
             </div>
             <div className={styles.input}>
               <TimePicker
                 name="time"
                 placeholder="Appointment Time"
-                options={dateOptions}
+                options={timeOptions}
               />
             </div>
           </div>

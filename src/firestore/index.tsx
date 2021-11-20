@@ -1,5 +1,14 @@
+import { format } from "date-fns";
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  query,
+  serverTimestamp,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 
 initializeApp({
   // these configuration should be hidden for security reason,
@@ -9,4 +18,42 @@ initializeApp({
   projectId: "sofax-appointment",
 });
 
-export const db = getFirestore();
+const db = getFirestore();
+
+export const createAppointment = async (appointmentDate: Date, who: string) => {
+  try {
+    const docRef = await addDoc(collection(db, "appointments"), {
+      who,
+      appointmentDate: Timestamp.fromDate(appointmentDate),
+      createOn: serverTimestamp(),
+    });
+    console.log(`Appointment created (ID: ${docRef.id})`);
+  } catch (e) {
+    console.error("Error creating appointment: ", e);
+  }
+};
+
+export const getAppointmentsQueryForDateRange = (
+  startDate: Date,
+  endDate: Date
+) => {
+  const appointmentsRef = collection(db, "appointments");
+
+  return query(
+    appointmentsRef,
+    where("appointmentDate", ">=", startDate),
+    where("appointmentDate", "<=", endDate)
+  );
+};
+
+export type AppointmentDoc = {
+  appointmentDate: Timestamp;
+  createdOn: Timestamp;
+  who: string;
+};
+
+// helper function to convert Firestore `Timestamp` to date string (eg. '20201205')
+export const convertFirestoreTimestampToDateString = (timestamp: Timestamp) => {
+  const date = timestamp.toDate();
+  return format(date, "yyyyMMdd");
+};

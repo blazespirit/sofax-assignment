@@ -1,12 +1,14 @@
 import clsx from "clsx";
 import { ErrorMessage, useField } from "formik";
 import {
+  MouseEventHandler,
   PropsWithChildren,
   useCallback,
   useMemo,
   useRef,
   useState,
 } from "react";
+
 import styles from "../dropdown-picker-shared-style.module.scss";
 import expandLessIcon from "./expand_less_24px.svg";
 import expandMoreIcon from "./expand_more_24px.svg";
@@ -23,6 +25,7 @@ export type Option<T> = {
   id: string;
   label: string;
   value: T;
+  taken: boolean;
 };
 
 export function TimePicker<T>(props: PropsWithChildren<Props<T>>) {
@@ -66,6 +69,11 @@ export function TimePicker<T>(props: PropsWithChildren<Props<T>>) {
     []
   );
 
+  const doNothing = useCallback<MouseEventHandler<HTMLDivElement>>(
+    (ev) => ev.stopPropagation(),
+    []
+  );
+
   return (
     <>
       <div
@@ -103,8 +111,10 @@ export function TimePicker<T>(props: PropsWithChildren<Props<T>>) {
           <div className={styles.dropdown}>
             {options.map((opts) => (
               <div
-                className={styles.option}
-                onClick={setValue(opts.value)}
+                className={clsx(styles.option, {
+                  [styles.disabledOption]: opts.taken,
+                })}
+                onClick={opts.taken ? doNothing : setValue(opts.value)}
                 key={opts.id}
               >
                 {opts.label}
