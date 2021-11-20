@@ -116,6 +116,7 @@ $input-error-msg-margin-top: 5px;
   top: 0;
   right: $dropdpwn-selector-padding-side;
   user-select: none;
+  cursor: pointer;
 }
 
 .container:focus .icon {
