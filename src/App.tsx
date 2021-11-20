@@ -41,7 +41,9 @@ export const App: FC = () => {
         username={username}
         appointmentCount={appointments.length}
       />
-      <AppointmentList appointments={appointments} />
+      {appointments.length > 0 && (
+        <AppointmentList appointments={appointments} />
+      )}
       <AppointmentForm username={username} />
     </div>
   );
