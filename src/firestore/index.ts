@@ -3,6 +3,8 @@ import { initializeApp } from "firebase/app";
 import {
   addDoc,
   collection,
+  doc,
+  deleteDoc,
   getFirestore,
   query,
   serverTimestamp,
@@ -46,6 +48,19 @@ export const getAppointmentsQueryForDateRange = (
   );
 };
 
+export const getAppointmentsQueryByUsername = (username: string) => {
+  const appointmentsRef = collection(db, "appointments");
+
+  return query(appointmentsRef, where("who", "==", username));
+};
+
+export const deleteAppointmentById = async (documentID: string) => {
+  const appointmentsRef = collection(db, "appointments");
+  const document = doc(appointmentsRef, documentID);
+
+  await deleteDoc(document);
+};
+
 export type AppointmentDoc = {
   appointmentDate: Timestamp;
   createdOn: Timestamp;
@@ -56,4 +71,12 @@ export type AppointmentDoc = {
 export const convertFirestoreTimestampToDateString = (timestamp: Timestamp) => {
   const date = timestamp.toDate();
   return format(date, "yyyyMMdd");
+};
+
+// helper function to convert Firestore `Timestamp` to date string (eg. '20 April 2021 @ 4pm')
+export const convertFirestoreTimestampToDateTimeString = (
+  timestamp: Timestamp
+) => {
+  const date = timestamp.toDate();
+  return format(date, "do MMMM yyyy @ h:mm a");
 };

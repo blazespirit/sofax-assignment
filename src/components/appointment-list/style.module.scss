@@ -1,0 +1,44 @@
+@import "src/base-style.scss";
+
+.card {
+  width: 100%;
+  max-width: 800px;
+  box-sizing: border-box;
+  color: $black;
+  font-size: 16px;
+  line-height: 24px;
+  background: $white;
+  padding: 15px;
+  border-radius: $border-radius;
+  box-shadow: $panel-drop-shadow;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 26px;
+  margin-bottom: 14px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border: 1px solid $medium-grey;
+  border-radius: $border-radius;
+  margin-bottom: 10px;
+}
+
+.row:hover {
+  background: $light-blue;
+}
+
+.appointment {
+  color: $primary-blue;
+  font-size: 16px;
+  line-height: 32px;
+}
+
+.buttonWrapper {
+  width: 90px;
+}

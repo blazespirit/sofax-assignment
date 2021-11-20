@@ -2,6 +2,8 @@
 
 This project is created using `create-react-app` (https://github.com/facebook/create-react-app) and Google FireStore as backend data persistence.
 
+I use native browser prompt to get the user name and use it as a simple identification for the user, the user name from the prompt will be record into the Firestore document alongside with the appointment date & time, so if next time the user revisit the site and key in the same user name he/she will be able to view his/her appointments.
+
 ## Tool needed to run this project
 
 1. Install NodeJS (instruction here: https://nodejs.org/en/download/package-manager/)
