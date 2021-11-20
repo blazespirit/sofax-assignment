@@ -8,7 +8,7 @@ import * as Yup from "yup";
 
 import {
   AppointmentDoc,
-  convertFirestoreTimestampToDateString,
+  convertFirestoreTimestampToDateNumberString,
   createAppointment,
   getAppointmentsQueryForDateRange,
 } from "../../firestore";
@@ -93,7 +93,7 @@ export const AppointmentForm: FC<Props> = (props) => {
         const appointmentsGroupedByDate = groupBy(
           allAppointmentsWithinSelectableRange,
           (appointmentRecord) => {
-            return convertFirestoreTimestampToDateString(
+            return convertFirestoreTimestampToDateNumberString(
               appointmentRecord.appointmentDate
             );
           }

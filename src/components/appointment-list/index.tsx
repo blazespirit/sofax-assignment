@@ -1,7 +1,8 @@
 import { FC, useCallback, useMemo } from "react";
 import { AppointmentDocWithId } from "../../App";
 import {
-  convertFirestoreTimestampToDateTimeString,
+  convertFirestoreTimestampToDateString,
+  convertFirestoreTimestampToTimeString,
   deleteAppointmentById,
 } from "../../firestore";
 import { Button } from "../button";
@@ -13,7 +14,8 @@ type Props = {
 
 type Booking = {
   id: string;
-  formattedDateTime: string;
+  formattedDate: string;
+  formattedTime: string;
 };
 
 export const AppointmentList: FC<Props> = (props) => {
@@ -22,7 +24,10 @@ export const AppointmentList: FC<Props> = (props) => {
   const appointmentWithFormattedLabel = useMemo<Booking[]>(() => {
     return appointments.map((booking) => ({
       id: booking.id,
-      formattedDateTime: convertFirestoreTimestampToDateTimeString(
+      formattedDate: convertFirestoreTimestampToDateString(
+        booking.appointmentDate
+      ),
+      formattedTime: convertFirestoreTimestampToTimeString(
         booking.appointmentDate
       ),
     }));
@@ -32,7 +37,7 @@ export const AppointmentList: FC<Props> = (props) => {
     (booking: Booking) => () => {
       if (
         window.confirm(
-          `Do you want to cancel appointment on ${booking.formattedDateTime}`
+          `Do you want to cancel appointment on ${booking.formattedDate} @ ${booking.formattedTime}`
         )
       ) {
         deleteAppointmentById(booking.id);
@@ -46,7 +51,10 @@ export const AppointmentList: FC<Props> = (props) => {
       <div className={styles.title}>Your appointment(s) with SofaX</div>
       {appointmentWithFormattedLabel.map((booking) => (
         <div className={styles.row} key={booking.id}>
-          <div className={styles.appointment}>{booking.formattedDateTime}</div>
+          <div className={styles.appointment}>
+            <div>{booking.formattedDate}</div>
+            <div>&nbsp;{`@ ${booking.formattedTime}`}</div>
+          </div>
           <div className={styles.buttonWrapper}>
             <Button
               variant="outlined"

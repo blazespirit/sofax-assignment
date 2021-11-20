@@ -68,15 +68,21 @@ export type AppointmentDoc = {
 };
 
 // helper function to convert Firestore `Timestamp` to date string (eg. '20201205')
-export const convertFirestoreTimestampToDateString = (timestamp: Timestamp) => {
+export const convertFirestoreTimestampToDateNumberString = (
+  timestamp: Timestamp
+) => {
   const date = timestamp.toDate();
   return format(date, "yyyyMMdd");
 };
 
 // helper function to convert Firestore `Timestamp` to date string (eg. '20 April 2021 @ 4pm')
-export const convertFirestoreTimestampToDateTimeString = (
-  timestamp: Timestamp
-) => {
+export const convertFirestoreTimestampToDateString = (timestamp: Timestamp) => {
   const date = timestamp.toDate();
-  return format(date, "do MMMM yyyy @ h:mm a");
+  return format(date, "do MMMM yyyy");
+};
+
+// helper function to convert Firestore `Timestamp` to time string (eg. '4:00 PM')
+export const convertFirestoreTimestampToTimeString = (timestamp: Timestamp) => {
+  const date = timestamp.toDate();
+  return format(date, "h:mm a");
 };
